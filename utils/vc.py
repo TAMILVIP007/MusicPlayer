@@ -29,10 +29,7 @@ class MusicPlayer(object):
         )
 
     async def send_playlist(self):
-        playlist = self.playlist
-        if not playlist:
-            pl = f"{emoji.NO_ENTRY} Empty playlist"
-        else:
+        if playlist := self.playlist:
             if len(playlist) == 1:
                 pl = f"{emoji.REPEAT_SINGLE_BUTTON} **Playlist**:\n"
             else:
@@ -41,6 +38,8 @@ class MusicPlayer(object):
                 f"**{i}**. **{x.audio.title}**"
                 for i, x in enumerate(playlist)
             ])
+        else:
+            pl = f"{emoji.NO_ENTRY} Empty playlist"
         if self.msg.get('playlist') is not None:
             await self.msg['playlist'].delete()
         self.msg['playlist'] = await self.send_text(pl)
@@ -141,8 +140,7 @@ class MusicPlayer(object):
     async def stop_radio(self):
         if 0 in RADIO:
             return
-        group_call = mp.group_call
-        if group_call:
+        if group_call := mp.group_call:
             await group_call.stop()
             try:
                 RADIO.remove(1)
@@ -152,8 +150,7 @@ class MusicPlayer(object):
                 RADIO.add(0)
             except:
                 pass
-        process = FFMPEG_PROCESSES.get(CHAT)
-        if process:
+        if process := FFMPEG_PROCESSES.get(CHAT):
             process.send_signal(signal.SIGTERM)
 
     async def start_call(self):
@@ -192,10 +189,7 @@ mp = MusicPlayer()
 
 @mp.group_call.on_network_status_changed
 async def network_status_changed_handler(gc: GroupCall, is_connected: bool):
-    if is_connected:
-        mp.chat_id = int("-100" + str(gc.full_chat.id))
-    else:
-        mp.chat_id = None
+    mp.chat_id = int("-100" + str(gc.full_chat.id)) if is_connected else None
 
 
 @mp.group_call.on_playout_ended

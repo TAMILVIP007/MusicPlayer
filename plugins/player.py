@@ -14,10 +14,7 @@ LOG_GROUP=Config.LOG_GROUP
 
 async def current_vc_filter(_, __, m: Message):
     group_call = mp.group_call
-    if group_call.is_connected:
-        return True
-    else:
-        return False
+    return bool(group_call.is_connected)
 
 
 current_vc = filters.create(current_vc_filter)
@@ -270,10 +267,7 @@ async def unmute(_, m: Message):
 
 @Client.on_message(filters.command("playlist"))
 async def playlist(_, m: Message):
-    playlist = mp.playlist
-    if not playlist:
-        pl = f"{emoji.NO_ENTRY} empty playlist"
-    else:
+    if playlist := mp.playlist:
         if len(playlist) == 1:
             pl = f"{emoji.REPEAT_SINGLE_BUTTON} **Playlist**:\n"
         else:
@@ -282,4 +276,6 @@ async def playlist(_, m: Message):
             f"**{i}**. **{x.audio.title}**"
             for i, x in enumerate(playlist)
             ])
+    else:
+        pl = f"{emoji.NO_ENTRY} empty playlist"
     await m.reply_text(pl)
